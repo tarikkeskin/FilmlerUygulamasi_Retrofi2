@@ -4,13 +4,18 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.info.retrofitkullanimi.ApiUtils
 import kotlinx.android.synthetic.main.activity_filmler.*
 import kotlinx.android.synthetic.main.activity_main.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class FilmlerActivity : AppCompatActivity() {
 
     private lateinit var filmListe:ArrayList<Filmler>
     private lateinit var adapter:FilmlerAdapter
+    private lateinit var fdi:FilmlerDaoInterface
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,22 +29,26 @@ class FilmlerActivity : AppCompatActivity() {
         filmlerRv.setHasFixedSize(true)
         filmlerRv.layoutManager = StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL)
 
-        filmListe = ArrayList()
+        fdi = ApiUtils.getFilmlerDaoInterface()
 
-        val k = Kategoriler(1,"Dram")
-        val y = Yonetmenler(1,"Quentin Tarantino")
+        tumFilmlerByKategoriId(kategori.kategori_id)
+    }
 
-        val f1 = Filmler(1,"Django",2008,"django",k,y)
-        val f2 = Filmler(2,"Inception",2009,"inception",k,y)
-        val f3 = Filmler(3,"The Pianist",2010,"thepianist",k,y)
+    fun tumFilmlerByKategoriId(kategori_id:Int){
+        fdi.tumFilmlerByKategoriId(kategori_id).enqueue(object : Callback<FilmlerCevap>{
 
-        filmListe.add(f1)
-        filmListe.add(f2)
-        filmListe.add(f3)
+            override fun onResponse(call: Call<FilmlerCevap>?, response: Response<FilmlerCevap>?) {
 
-        adapter = FilmlerAdapter(this,filmListe)
+                if(response != null){
+                    val liste = response.body().filmler
 
-        filmlerRv.adapter = adapter
+                    adapter = FilmlerAdapter(this@FilmlerActivity,liste)
 
+                    filmlerRv.adapter = adapter
+                }
+            }
+
+            override fun onFailure(call: Call<FilmlerCevap>?, t: Throwable?) { }
+        })
     }
 }
