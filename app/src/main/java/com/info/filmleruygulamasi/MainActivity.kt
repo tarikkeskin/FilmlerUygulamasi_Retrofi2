@@ -3,12 +3,17 @@ package com.info.filmleruygulamasi
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.info.retrofitkullanimi.ApiUtils
 import kotlinx.android.synthetic.main.activity_main.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var kategoriListe:ArrayList<Kategoriler>
     private lateinit var adapter:KategoriAdapter
+    private lateinit var kdi:KategorilerDaoInterface
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,16 +25,26 @@ class MainActivity : AppCompatActivity() {
         kategoriRv.setHasFixedSize(true)
         kategoriRv.layoutManager = LinearLayoutManager(this)
 
-        kategoriListe = ArrayList()
+        kdi = ApiUtils.getKategorilerDaoInterface()
+        tumKategoriler()
+    }
 
-        val k1 = Kategoriler(1,"Komedi")
-        val k2 = Kategoriler(2,"Bilim Kurgu")
+    fun tumKategoriler(){
+        kdi.tumKategoriler().enqueue(object : Callback<KategorilerCevap>{
+            override fun onResponse(call: Call<KategorilerCevap>?, response: Response<KategorilerCevap>?) {
 
-        kategoriListe.add(k1)
-        kategoriListe.add(k2)
+                if(response != null){
+                    val liste= response.body().kategoriler
+                    adapter = KategoriAdapter(this@MainActivity,liste)
 
-        adapter = KategoriAdapter(this,kategoriListe)
+                    kategoriRv.adapter = adapter
+                }
+            }
 
-        kategoriRv.adapter = adapter
+            override fun onFailure(call: Call<KategorilerCevap>?, t: Throwable?) {
+                TODO("Not yet implemented")
+            }
+
+        })
     }
 }

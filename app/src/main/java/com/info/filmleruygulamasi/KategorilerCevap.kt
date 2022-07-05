@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 
 data class KategorilerCevap(@SerializedName("kategoriler")
                             @Expose
-                            var kategoler:List<Kategoriler>
+                            var kategoriler:List<Kategoriler>
                             ,
                             @SerializedName("success")
                             @Expose
